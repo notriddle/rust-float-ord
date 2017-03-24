@@ -1,9 +1,9 @@
 Total ordering for floats
 =========================
 
-[![Build Status](https://travis-ci.org/notriddle/rust-float-ord.svg)](https://travis-ci.org/notriddle/rust-float-ord)
+[![Build Status](https://travis-ci.org/notriddle/rust-float-ord.svg?branch=master)](https://travis-ci.org/notriddle/rust-float-ord)
 [![Crates.IO](https://img.shields.io/crates/v/float-ord.svg)](https://crates.io/crates/float-ord)
-[![Documentation](https://docs.rs/float-ord/)](https://docs.rs/float-ord/badge.svg)
+[![Documentation](https://docs.rs/float-ord/badge.svg)](https://docs.rs/float-ord)
 
 A wrapper for floats that uses this ordering:
 
