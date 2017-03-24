@@ -1,8 +1,25 @@
 language: rust
+cache: cargo
 rust:
   - nightly
   - beta
   - stable
 
+branches:
+  only:
+    - master
+    - staging
+    - trying
+
+env:
+  - FEATURES="pdqsort"
+  - FEATURES=""
+
 script:
-  - cargo test --features="pdqsort"
+  - cargo test --features="$FEATURES"
+
+matrix:
+  fast_finish: true
+
+notifications:
+  email: false
