@@ -8,9 +8,11 @@
 extern crate pdqsort;
 
 use core::cmp::{Eq, Ord, Ordering, PartialEq, PartialOrd};
+use core::hash::{Hash, Hasher};
 use core::mem::transmute;
 
-/// A wrapper for floats, that implements total equality and ordering.
+/// A wrapper for floats, that implements total equality and ordering
+/// and hashing.
 #[derive(Clone, Copy)]
 pub struct FloatOrd<T>(pub T);
 
@@ -41,6 +43,11 @@ macro_rules! float_ord_impl {
         impl Ord for FloatOrd<$f> {
             fn cmp(&self, other: &Self) -> Ordering {
                 self.convert().cmp(&other.convert())
+            }
+        }
+        impl Hash for FloatOrd<$f> {
+            fn hash<H: Hasher>(&self, state: &mut H) {
+                self.convert().hash(state);
             }
         }
     }
@@ -76,6 +83,8 @@ mod tests {
 
     use self::rand::{Rng, thread_rng};
     use self::std::prelude::v1::*;
+    use self::std::collections::hash_map::DefaultHasher;
+    use self::std::hash::{Hash, Hasher};
     use super::FloatOrd;
 
     #[test]
@@ -110,6 +119,24 @@ mod tests {
                 assert!(v.windows(2).all(|w| (w[0] <= w[1]) == (FloatOrd(w[0]) <= FloatOrd(w[1]))));
             }
         }
+    }
+
+    fn hash<F: Hash>(f: F) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        f.hash(&mut hasher);
+        hasher.finish()
+    }
+
+    #[test]
+    fn test_hash() {
+        assert_ne!(hash(FloatOrd(0.0f64)), hash(FloatOrd(-0.0f64)));
+        assert_ne!(hash(FloatOrd(0.0f32)), hash(FloatOrd(-0.0f32)));
+        assert_eq!(hash(FloatOrd(-0.0f64)), hash(FloatOrd(-0.0f64)));
+        assert_eq!(hash(FloatOrd(0.0f32)), hash(FloatOrd(0.0f32)));
+        assert_ne!(hash(FloatOrd(::core::f64::NAN)), hash(FloatOrd(-::core::f64::NAN)));
+        assert_ne!(hash(FloatOrd(::core::f32::NAN)), hash(FloatOrd(-::core::f32::NAN)));
+        assert_eq!(hash(FloatOrd(::core::f64::NAN)), hash(FloatOrd(::core::f64::NAN)));
+        assert_eq!(hash(FloatOrd(-::core::f32::NAN)), hash(FloatOrd(-::core::f32::NAN)));
     }
 
     #[cfg(feature="pdqsort")]
