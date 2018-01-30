@@ -3,6 +3,7 @@ name = "float-ord"
 version = "0.1.2"
 authors = ["Michael Howell <michael@notriddle.com>"]
 description = "A total ordering for floating-point numbers"
+keywords = ["floats", "sort", "compare"]
 license = "MIT / Apache-2.0"
 repository = "https://github.com/notriddle/rust-float-ord"
 documentation = "https://docs.rs/float-ord/0.1.2/float-ord/"
