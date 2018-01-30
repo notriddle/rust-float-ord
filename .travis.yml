@@ -11,10 +11,6 @@ branches:
     - staging
     - trying
 
-env:
-  - FEATURES="pdqsort"
-  - FEATURES=""
-
 script:
   - cargo test --features="$FEATURES"
 
