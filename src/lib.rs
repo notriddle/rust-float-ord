@@ -4,9 +4,6 @@
 
 #![no_std]
 
-#[cfg(feature="pdqsort")]
-extern crate pdqsort;
-
 use core::cmp::{Eq, Ord, Ordering, PartialEq, PartialOrd};
 use core::hash::{Hash, Hasher};
 use core::mem::transmute;
@@ -56,7 +53,6 @@ macro_rules! float_ord_impl {
 float_ord_impl!(f32, u32, 32);
 float_ord_impl!(f64, u64, 64);
 
-#[cfg(feature="pdqsort")]
 /// Sort a slice of floats.
 ///
 /// # Allocation behavior
@@ -73,7 +69,7 @@ float_ord_impl!(f64, u64, 64);
 /// ```
 pub fn sort<T>(v: &mut [T]) where FloatOrd<T>: Ord {
     let v_: &mut [FloatOrd<T>] = unsafe { transmute(v) };
-    pdqsort::sort(v_);
+    v_.sort_unstable();
 }
 
 #[cfg(test)]
@@ -139,7 +135,6 @@ mod tests {
         assert_eq!(hash(FloatOrd(-::core::f32::NAN)), hash(FloatOrd(-::core::f32::NAN)));
     }
 
-    #[cfg(feature="pdqsort")]
     #[test]
     fn test_sort_numbers() {
         let mut rng = thread_rng();
@@ -167,7 +162,6 @@ mod tests {
         assert!(v == [5.0]);
     }
 
-    #[cfg(feature="pdqsort")]
     #[test]
     fn test_sort_nan() {
         let nan = ::core::f64::NAN;
