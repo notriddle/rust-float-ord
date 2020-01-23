@@ -78,6 +78,7 @@ mod tests {
     extern crate rand;
 
     use self::rand::{Rng, thread_rng};
+    use self::std::iter;
     use self::std::prelude::v1::*;
     use self::std::collections::hash_map::DefaultHasher;
     use self::std::hash::{Hash, Hasher};
@@ -108,8 +109,8 @@ mod tests {
         let mut rng = thread_rng();
         for n in 0..16 {
             for l in 0..16 {
-                let v = rng.gen_iter::<f64>()
-                    .map(|x| x % (1 << l) as i64 as f64)
+                let v = iter::repeat(()).map(|()| rng.gen())
+                    .map(|x: f64| x % (1 << l) as i64 as f64)
                     .take((1 << n))
                     .collect::<Vec<_>>();
                 assert!(v.windows(2).all(|w| (w[0] <= w[1]) == (FloatOrd(w[0]) <= FloatOrd(w[1]))));
@@ -140,14 +141,14 @@ mod tests {
         let mut rng = thread_rng();
         for n in 0..16 {
             for l in 0..16 {
-                let mut v = rng.gen_iter::<f64>()
-                    .map(|x| x % (1 << l) as i64 as f64)
+                let mut v = iter::repeat(()).map(|()| rng.gen())
+                    .map(|x: f64| x % (1 << l) as i64 as f64)
                     .take((1 << n))
                     .collect::<Vec<_>>();
                 let mut v1 = v.clone();
 
                 super::sort(&mut v);
-                assert!(v.windows(2).all(|w| w[0] <= w[1]));
+                assert!(v.windows(2).all(|w: &[f64]| w[0] <= w[1]));
 
                 v1.sort_by(|a, b| a.partial_cmp(b).unwrap());
                 assert!(v1.windows(2).all(|w| w[0] <= w[1]));
