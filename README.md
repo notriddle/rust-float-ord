@@ -9,6 +9,15 @@ A wrapper for floats that uses this ordering:
 
     NaN | -Infinity | x < 0 | -0 | +0 | x > 0 | +Infinity | NaN
 
+## How does it work?
+
+There is an [old family magic spell](http://stereopsis.com/radix.html) that
+allows one to compare floating-point values without any floating-point work.
+Simply interpret the fp value as a signed integer, flip its sign bit (if
+positive) or all bits (if negative), and do the comparison normally.
+
+The trick was developed on `f32` and `f64`, but it should work on anything
+structured like the IEEE floats. Even the IEEE decimal formats.
 
 ## License
 
