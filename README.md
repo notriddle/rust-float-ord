@@ -13,7 +13,7 @@ A wrapper for floats that uses this ordering:
 
 There is an [old family magic spell](http://stereopsis.com/radix.html) that
 allows one to compare floating-point values without any floating-point work.
-Simply interpret the fp value as a signed integer, flip its sign bit (if
+Simply interpret the fp value as an unsigned integer, flip its sign bit (if
 positive) or all bits (if negative), and do the comparison normally.
 
 The trick was developed on `f32` and `f64`, but it should work on anything
