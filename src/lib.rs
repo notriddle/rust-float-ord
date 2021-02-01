@@ -10,7 +10,7 @@ use core::mem::transmute;
 
 /// A wrapper for floats, that implements total equality and ordering
 /// and hashing.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct FloatOrd<T>(pub T);
 
 macro_rules! float_ord_impl {
@@ -111,7 +111,7 @@ mod tests {
             for l in 0..16 {
                 let v = iter::repeat(()).map(|()| rng.gen())
                     .map(|x: f64| x % (1 << l) as i64 as f64)
-                    .take((1 << n))
+                    .take(1 << n)
                     .collect::<Vec<_>>();
                 assert!(v.windows(2).all(|w| (w[0] <= w[1]) == (FloatOrd(w[0]) <= FloatOrd(w[1]))));
             }
@@ -143,7 +143,7 @@ mod tests {
             for l in 0..16 {
                 let mut v = iter::repeat(()).map(|()| rng.gen())
                     .map(|x: f64| x % (1 << l) as i64 as f64)
-                    .take((1 << n))
+                    .take(1 << n)
                     .collect::<Vec<_>>();
                 let mut v1 = v.clone();
 
