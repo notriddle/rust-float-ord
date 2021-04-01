@@ -1,6 +1,6 @@
 [package]
 name = "float-ord"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Michael Howell <michael@notriddle.com>"]
 description = "A total ordering for floating-point numbers"
 keywords = ["floats", "sort", "compare"]
