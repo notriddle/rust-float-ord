@@ -10,7 +10,7 @@ repository = "https://github.com/notriddle/rust-float-ord"
 documentation = "https://docs.rs/float-ord/0.2.0/float-ord/"
 
 [dev-dependencies]
-rand = "0.7"
+rand = "0.8"
 
 [badges]
 travis-ci = { repository = "notriddle/rust-float-ord" }
