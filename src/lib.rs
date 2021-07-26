@@ -11,6 +11,7 @@ use core::mem::transmute;
 /// A wrapper for floats, that implements total equality and ordering
 /// and hashing.
 #[derive(Clone, Copy, Debug)]
+#[transparent]
 pub struct FloatOrd<T>(pub T);
 
 macro_rules! float_ord_impl {
