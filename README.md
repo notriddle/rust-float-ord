@@ -19,6 +19,12 @@ positive) or all bits (if negative), and do the comparison normally.
 The trick was developed on `f32` and `f64`, but it should work on anything
 structured like the IEEE floats. Even the IEEE decimal formats.
 
+This comparison matches the definition of an [IEEE 754 total order][754-ord]
+if and only if your platform's `NAN` encoding puts the signaling bit in the
+most significant position of the mantissa per recommended by IEEE 754-2008.
+
+  [754-ord]: https://en.wikipedia.org/wiki/IEEE_754#Total-ordering_predicate
+
 ## License
 
 Licensed under either of
