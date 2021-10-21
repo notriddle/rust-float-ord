@@ -10,7 +10,7 @@ use core::mem::transmute;
 
 /// A wrapper for floats, that implements total equality and ordering
 /// and hashing.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Default)]
 #[repr(transparent)]
 pub struct FloatOrd<T>(pub T);
 
@@ -18,7 +18,7 @@ macro_rules! float_ord_impl {
     ($f:ident, $i:ident, $n:expr) => {
         impl FloatOrd<$f> {
             fn convert(self) -> $i {
-                let u = unsafe { transmute::<$f, $i>(self.0) };
+                let u: $i = self.0.to_bits();
                 let bit = 1 << ($n - 1);
                 if u & bit == 0 {
                     u | bit
