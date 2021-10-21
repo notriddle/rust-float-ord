@@ -10,7 +10,7 @@ use core::mem::transmute;
 
 /// A wrapper for floats, that implements total equality and ordering
 /// and hashing.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Default)]
 #[repr(transparent)]
 pub struct FloatOrd<T>(pub T);
 
