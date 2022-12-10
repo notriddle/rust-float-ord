@@ -9,8 +9,18 @@ license = "MIT / Apache-2.0"
 repository = "https://github.com/notriddle/rust-float-ord"
 documentation = "https://docs.rs/float-ord/0.3.1/float-ord/"
 
+[features]
+bytemuck = ["dep:bytemuck"]
+
 [dev-dependencies]
 rand = "0.8"
+bytemuck = { version = "1.12.3", features = ["derive", "extern_crate_std", "min_const_generics"] }
 
 [badges]
 travis-ci = { repository = "notriddle/rust-float-ord" }
+
+[dependencies.bytemuck]
+optional = true
+version = "1.12.3"
+default-features = false
+features = ["derive"]

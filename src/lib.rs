@@ -11,8 +11,15 @@ use core::mem::transmute;
 /// A wrapper for floats, that implements total equality and ordering
 /// and hashing.
 #[derive(Clone, Copy, Debug, Default)]
+#[cfg_attr(
+    any(test, feature = "bytemuck"),
+    derive(bytemuck::Zeroable, bytemuck::Pod)
+)]
 #[repr(transparent)]
 pub struct FloatOrd<T>(pub T);
+
+#[cfg(any(test, feature = "bytemuck"))]
+unsafe impl<T> bytemuck::TransparentWrapper<T> for FloatOrd<T> {}
 
 macro_rules! float_ord_impl {
     ($f:ident, $i:ident, $n:expr) => {
@@ -77,6 +84,7 @@ pub fn sort<T>(v: &mut [T]) where FloatOrd<T>: Ord {
 mod tests {
     extern crate std;
     extern crate rand;
+    extern crate bytemuck;
 
     use self::rand::{Rng, thread_rng};
     use self::std::iter;
@@ -169,6 +177,50 @@ mod tests {
         let nan = ::core::f64::NAN;
         let mut v = [-1.0, 5.0, 0.0, -0.0, nan, 1.5, nan, 3.7];
         super::sort(&mut v);
+        assert!(v[0] == -1.0);
+        assert!(v[1] == 0.0 && v[1].is_sign_negative());
+        assert!(v[2] == 0.0 && !v[2].is_sign_negative());
+        assert!(v[3] == 1.5);
+        assert!(v[4] == 3.7);
+        assert!(v[5] == 5.0);
+        assert!(v[6].is_nan());
+        assert!(v[7].is_nan());
+    }
+
+    #[test]
+    fn test_bytemuck() {
+        use tests::bytemuck::TransparentWrapper;
+
+        assert!(FloatOrd::wrap(0.0f32) > FloatOrd(-0.0f32));
+        assert!(FloatOrd(0.0f32) > FloatOrd::wrap(-0.0f32));
+        assert!(FloatOrd::wrap(::core::f64::NAN) == FloatOrd(::core::f64::NAN));
+        assert!(FloatOrd(::core::f64::NAN) == FloatOrd::wrap(::core::f64::NAN));
+        assert!(FloatOrd::wrap(::core::f32::NAN) == FloatOrd(::core::f32::NAN));
+        assert!(FloatOrd(::core::f32::NAN) == FloatOrd::wrap(::core::f32::NAN));
+        assert!(FloatOrd::wrap(-::core::f64::NAN) < FloatOrd(::core::f64::NAN));
+        assert!(FloatOrd(-::core::f64::NAN) < FloatOrd::wrap(::core::f64::NAN));
+        assert!(FloatOrd::wrap(-::core::f32::NAN) < FloatOrd(::core::f32::NAN));
+        assert!(FloatOrd(-::core::f32::NAN) < FloatOrd::wrap(::core::f32::NAN));
+        assert!(FloatOrd::wrap(-::core::f64::INFINITY) < FloatOrd(::core::f64::INFINITY));
+        assert!(FloatOrd(-::core::f64::INFINITY) < FloatOrd::wrap(::core::f64::INFINITY));
+        assert!(FloatOrd::wrap(-::core::f32::INFINITY) < FloatOrd(::core::f32::INFINITY));
+        assert!(FloatOrd(-::core::f32::INFINITY) < FloatOrd::wrap(::core::f32::INFINITY));
+        assert!(FloatOrd::wrap(::core::f64::INFINITY) < FloatOrd(::core::f64::NAN));
+        assert!(FloatOrd(::core::f64::INFINITY) < FloatOrd::wrap(::core::f64::NAN));
+        assert!(FloatOrd::wrap(::core::f32::INFINITY) < FloatOrd(::core::f32::NAN));
+        assert!(FloatOrd(::core::f32::INFINITY) < FloatOrd::wrap(::core::f32::NAN));
+        assert!(FloatOrd::wrap(-::core::f64::NAN) < FloatOrd(::core::f64::INFINITY));
+        assert!(FloatOrd(-::core::f64::NAN) < FloatOrd::wrap(::core::f64::INFINITY));
+        assert!(FloatOrd::wrap(-::core::f32::NAN) < FloatOrd(::core::f32::INFINITY));
+        assert!(FloatOrd(-::core::f32::NAN) < FloatOrd::wrap(::core::f32::INFINITY));
+    }
+
+    #[test]
+    fn test_sort_bytemuck() {
+        let nan = ::core::f64::NAN;
+        let mut v = [-1.0, 5.0, 0.0, -0.0, nan, 1.5, nan, 3.7];
+        let floatord_slice: &mut [FloatOrd<f64>] = bytemuck::cast_slice_mut(&mut v);
+        floatord_slice.sort_unstable();
         assert!(v[0] == -1.0);
         assert!(v[1] == 0.0 && v[1].is_sign_negative());
         assert!(v[2] == 0.0 && !v[2].is_sign_negative());
