@@ -8,6 +8,7 @@ use core::cmp::{Eq, Ord, Ordering, PartialEq, PartialOrd};
 use core::hash::{Hash, Hasher};
 use core::mem::transmute;
 use core::ops::Deref;
+use core::ops::{Add, Div, Mul, Rem, Sub};
 
 /// A wrapper for floats, that implements total equality and ordering
 /// and hashing.
@@ -68,7 +69,42 @@ macro_rules! float_ord_impl {
                 &self.0
             }
         }
-    }
+        impl Add for FloatOrd<$f> {
+            type Output = Self;
+
+            fn add(self, other: Self) -> Self {
+                FloatOrd(self.0 + other.0)
+            }
+        }
+        impl Sub for FloatOrd<$f> {
+            type Output = Self;
+
+            fn sub(self, other: Self) -> Self {
+                FloatOrd(self.0 - other.0)
+            }
+        }
+        impl Mul for FloatOrd<$f> {
+            type Output = Self;
+
+            fn mul(self, other: Self) -> Self {
+                FloatOrd(self.0 * other.0)
+            }
+        }
+        impl Div for FloatOrd<$f> {
+            type Output = Self;
+
+            fn div(self, other: Self) -> Self {
+                FloatOrd(self.0 / other.0)
+            }
+        }
+        impl Rem for FloatOrd<$f> {
+            type Output = Self;
+
+            fn rem(self, other: Self) -> Self {
+                FloatOrd(self.0 % other.0)
+            }
+        }
+    };
 }
 
 float_ord_impl!(f32, u32, 32);
@@ -88,22 +124,25 @@ float_ord_impl!(f64, u64, 64);
 /// float_ord::sort(&mut v);
 /// assert!(v == [-5.0, -3.0, 1.0, 2.0, 4.0]);
 /// ```
-pub fn sort<T>(v: &mut [T]) where FloatOrd<T>: Ord {
+pub fn sort<T>(v: &mut [T])
+where
+    FloatOrd<T>: Ord,
+{
     let v_: &mut [FloatOrd<T>] = unsafe { transmute(v) };
     v_.sort_unstable();
 }
 
 #[cfg(test)]
 mod tests {
-    extern crate std;
-    extern crate rand;
     extern crate bytemuck;
+    extern crate rand;
+    extern crate std;
 
-    use self::rand::{Rng, thread_rng};
-    use self::std::iter;
-    use self::std::prelude::v1::*;
+    use self::rand::{thread_rng, Rng};
     use self::std::collections::hash_map::DefaultHasher;
     use self::std::hash::{Hash, Hasher};
+    use self::std::iter;
+    use self::std::prelude::v1::*;
     use super::FloatOrd;
 
     #[test]
@@ -133,11 +172,14 @@ mod tests {
         let mut rng = thread_rng();
         for n in 0..16 {
             for l in 0..16 {
-                let v = iter::repeat(()).map(|()| rng.gen())
+                let v = iter::repeat(())
+                    .map(|()| rng.gen())
                     .map(|x: f64| x % (1 << l) as i64 as f64)
                     .take(1 << n)
                     .collect::<Vec<_>>();
-                assert!(v.windows(2).all(|w| (w[0] <= w[1]) == (FloatOrd(w[0]) <= FloatOrd(w[1]))));
+                assert!(v
+                    .windows(2)
+                    .all(|w| (w[0] <= w[1]) == (FloatOrd(w[0]) <= FloatOrd(w[1]))));
             }
         }
     }
@@ -160,10 +202,22 @@ mod tests {
         assert_ne!(hash(FloatOrd(0.0f32)), hash(FloatOrd(-0.0f32)));
         assert_eq!(hash(FloatOrd(-0.0f64)), hash(FloatOrd(-0.0f64)));
         assert_eq!(hash(FloatOrd(0.0f32)), hash(FloatOrd(0.0f32)));
-        assert_ne!(hash(FloatOrd(::core::f64::NAN)), hash(FloatOrd(-::core::f64::NAN)));
-        assert_ne!(hash(FloatOrd(::core::f32::NAN)), hash(FloatOrd(-::core::f32::NAN)));
-        assert_eq!(hash(FloatOrd(::core::f64::NAN)), hash(FloatOrd(::core::f64::NAN)));
-        assert_eq!(hash(FloatOrd(-::core::f32::NAN)), hash(FloatOrd(-::core::f32::NAN)));
+        assert_ne!(
+            hash(FloatOrd(::core::f64::NAN)),
+            hash(FloatOrd(-::core::f64::NAN))
+        );
+        assert_ne!(
+            hash(FloatOrd(::core::f32::NAN)),
+            hash(FloatOrd(-::core::f32::NAN))
+        );
+        assert_eq!(
+            hash(FloatOrd(::core::f64::NAN)),
+            hash(FloatOrd(::core::f64::NAN))
+        );
+        assert_eq!(
+            hash(FloatOrd(-::core::f32::NAN)),
+            hash(FloatOrd(-::core::f32::NAN))
+        );
     }
 
     #[test]
@@ -171,7 +225,8 @@ mod tests {
         let mut rng = thread_rng();
         for n in 0..16 {
             for l in 0..16 {
-                let mut v = iter::repeat(()).map(|()| rng.gen())
+                let mut v = iter::repeat(())
+                    .map(|()| rng.gen())
                     .map(|x: f64| x % (1 << l) as i64 as f64)
                     .take(1 << n)
                     .collect::<Vec<_>>();
